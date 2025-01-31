@@ -56,4 +56,21 @@ class Event extends Model
     {
         return $this->hasMany(Favorite::class);
     }
+
+    protected $fillable = [
+        'title',
+        'description',
+        'location',
+        'organizer_id',
+        'start_time',
+        'end_time',
+        'duration',
+        'price',
+        'category_id',
+        'max_capacity',
+        'is_cancelled',
+        'average_rating'
+    ];
+
+
 }

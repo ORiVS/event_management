@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organizer_id')->constrained('users');
+            $table->foreignId('organizer_id')->nullable()->constrained('users');
             $table->string('title', 200);
             $table->text('description');
             $table->string('location', 200);
-            $table->dateTime('start_time');
+            $table->dateTime('start_time')->nullable();
             $table->dateTime('end_time');
             $table->integer('duration');
             $table->decimal('price', 10, 2)->default(0.00);
