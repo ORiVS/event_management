@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\EventManagement\Users;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -12,19 +13,19 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     // Relation avec les événements organisés par l'utilisateur
-    public function events()
+    public function event(): HasMany
     {
         return $this->hasMany(Event::class, 'organizer_id');
     }
 
     // Relation avec les réservations faites par l'utilisateur
-    public function reservations()
+    public function reservations() : HasMany
     {
         return $this->hasMany(Reservation::class);
     }
 
     // Relation avec les commentaires laissés par l'utilisateur
-    public function comments()
+    public function comments() : HasMany
     {
         return $this->hasMany(Comment::class);
     }
@@ -92,4 +93,5 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
 }

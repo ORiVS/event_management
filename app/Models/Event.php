@@ -72,5 +72,8 @@ class Event extends Model
         'average_rating'
     ];
 
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 
 }
