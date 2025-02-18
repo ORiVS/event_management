@@ -4,7 +4,7 @@ namespace App\EventManagement\Users\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RegisterRequest extends FormRequest
+class LoginRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,18 +22,17 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|max:255',
-            'email' => 'required||unique:users',
-            'password' => 'required|confirmed',
+            'email' => 'required|email|exists:users',
+            'password' => 'required',
         ];
     }
 
-    public function messages(): array {
+    public function messages() : array
+    {
         return [
-            'name.required' => 'Name is required',
-            'email.required' => 'Le champ email est obligatoire',
-            'email.unique' => 'Le champ email est déjà utilisé',
-            'password.required' => 'Password is required',
+            'email.required' => 'The email field is required',
+            'email.exists' => 'The email does not exist',
+            'password.required' => 'The provided credentials are incorrect'
         ];
     }
 }

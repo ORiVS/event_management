@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\EventManagement\Users\UserService;
+use App\EventManagement\Users\Requests\LoginRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -28,27 +29,23 @@ class AuthController extends Controller
     ]);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request) : JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email|exists:users',
-            'password' => 'required',
-        ]);
+        $data = $request->validated();
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return  [
-                'message' => 'The provided credentials are incorrect'
-            ];
+        try {
+            $user = $this->userService->login($data); // Essaye de connecter l'utilisateur
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Invalid credentials'], 401);
         }
 
-        $token = $user->createToken($user->name);
+        $token = $user->createToken($data['email']); // Crée un token avec l'email de l'utilisateur
 
-        return [
+        return response()->json([
             'user' => $user,
             'token' => $token->plainTextToken,
-        ];
+        ]);
+
     }
 
     public function logout(Request $request)
