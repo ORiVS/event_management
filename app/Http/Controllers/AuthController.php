@@ -6,9 +6,8 @@ use App\EventManagement\Users\UserService;
 use App\EventManagement\Users\Requests\LoginRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use App\EventManagement\Users\Requests\RegisterRequest;
-use App\EventManagement\Users\User;
+use App\Models\User;
 
 class AuthController extends Controller
 {

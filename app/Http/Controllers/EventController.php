@@ -4,22 +4,23 @@ namespace App\Http\Controllers;
 
 
 use App\Models\Event;
-use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
 
-class EventController extends Controller implements HasMiddleware
+class EventController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
 
-    public static function middleware(): array
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    /**
+     * Appliquer le middleware dans le constructeur.
+     */
+    public function __construct()
     {
-        return[
-            new Middleware('auth:sanctum', except: ['index', 'show'])
-        ];
+        $this->middleware('auth:sanctum')->except(['index', 'show']);
     }
 
 
@@ -47,7 +48,9 @@ class EventController extends Controller implements HasMiddleware
             'max_capacity' => 'nullable|integer',
         ]);
 
-        $event = $request->user()->create($fields);
+        $fields['user_id'] = $request->user()->id ?? $request->input('user_id');
+
+        $event = Event::create($fields);
 
         return $event;
 
