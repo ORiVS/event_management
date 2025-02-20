@@ -9,8 +9,9 @@ class Guest extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['name', 'email', 'phone_number'];
     // Relation avec les tickets associés à cet invité
-    public function tickets()
+    public function tickets(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Ticket::class);
     }

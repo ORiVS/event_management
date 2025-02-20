@@ -23,8 +23,6 @@ class EventController extends BaseController
         $this->middleware('auth:sanctum')->except(['index', 'show']);
     }
 
-
-
     public function index(): \Illuminate\Database\Eloquent\Collection
     {
         return Event::all();
@@ -59,7 +57,7 @@ class EventController extends BaseController
     /**
      * Display the specified resource.
      */
-    public function show(Event $event)
+    public function show(Event $event): Event
     {
         return $event;
     }
@@ -67,7 +65,7 @@ class EventController extends BaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Event $event)
+    public function update(Request $request, Event $event): Event
     {
 
         Gate::authorize('modify', $event);
@@ -92,7 +90,7 @@ class EventController extends BaseController
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Event $event)
+    public function destroy(Event $event): array
     {
         Gate::authorize('modify', $event);
 

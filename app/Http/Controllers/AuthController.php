@@ -7,7 +7,6 @@ use App\EventManagement\Users\Requests\LoginRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\EventManagement\Users\Requests\RegisterRequest;
-use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -47,7 +46,7 @@ class AuthController extends Controller
 
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): array
     {
         $request->user()->tokens()->delete();
 

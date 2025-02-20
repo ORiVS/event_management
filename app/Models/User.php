@@ -31,33 +31,33 @@ class User extends Authenticatable
     }
 
     // Relation avec les notifications de l'utilisateur
-    public function notifications()
+    public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);
     }
 
     // Relation avec les reviews laissées par l'utilisateur
-    public function reviews()
+    public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
     // Relation avec les récompenses d'un utilisateur
-    public function rewards()
+    public function rewards(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Reward::class);
     }
 
     // Relation avec les événements favoris de l'utilisateur
-    public function favorites()
+    public function favorites(): HasMany
     {
         return $this->hasMany(Favorite::class);
     }
 
     // Relation avec les tickets d'un utilisateur
-    public function tickets()
+    public function tickets(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasManyThrough(Ticket::class, Reservation::class);
+        return $this->hasMany(Ticket::class, Reservation::class);
     }
 
     /**
