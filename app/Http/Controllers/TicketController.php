@@ -6,12 +6,15 @@ use App\Models\Event;
 use App\Models\Notification;
 use App\Models\Ticket;
 use App\Models\Guest;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller as BaseController;
-
+use Barryvdh\DomPDF\Facade\Pdf;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Writer;
 
 class TicketController extends BaseController
 {
@@ -19,6 +22,7 @@ class TicketController extends BaseController
     {
         $this->middleware('auth:sanctum')->except(['index', 'show']);
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -39,12 +43,10 @@ class TicketController extends BaseController
 
         $event = Event::findOrFail($event_id);
 
-        // Vérifier si l'événement a encore de la place
         if ($event->max_capacity && $event->tickets()->count() >= $event->max_capacity) {
             return response()->json(['message' => 'Event is fully booked'], 400);
         }
 
-        // Création du ticket
         $ticket = Ticket::create([
             'event_id' => $event->id,
             'guest_id' => $request->guest_id,
@@ -57,7 +59,7 @@ class TicketController extends BaseController
         Notification::create([
             'user_id' => $event->organizer_id ?? auth()->id(),
             'type' => Notification::TYPE_RESERVATION,
-            'message' => "Vous avez réservé un nouveau ticket (#{$ticket->ticket_code}) pour l'événement « {$event->title} ».",
+            'message' => "Vous avez réservé un nouveau ticket (#{$ticket->ticket_code}) pour l'événement « {$event->title} ». ",
             'status' => Notification::STATUS_PENDING,
         ]);
 
@@ -94,4 +96,26 @@ class TicketController extends BaseController
         $ticket->delete();
         return response()->json(['message' => 'Ticket cancelled']);
     }
-}
+
+    /**
+     * Télécharger un ticket en PDF avec QR code.
+     */
+
+    public function download(Ticket $ticket)
+    {
+        $ticket->load('event', 'guest', 'category');
+
+        // Utilisation du backend SVG (compatible Laravel + DomPDF)
+        $renderer = new ImageRenderer(
+            new RendererStyle(150),
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+        $qrCode = base64_encode($writer->writeString($ticket->ticket_code));
+
+        $user = auth()->user(); // l'utilisateur qui télécharge
+
+        $pdf = Pdf::loadView('tickets.pdf', compact('ticket', 'qrCode', 'user'));
+
+        return $pdf->download("ticket_{$ticket->ticket_code}.pdf");
+    }}
