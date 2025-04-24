@@ -18,8 +18,7 @@ class User extends Authenticatable
         return $this->hasMany(Event::class, 'organizer_id');
     }
 
-    // Relation avec les réservations faites par l'utilisateur
-    public function reservations() : HasMany
+    public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
     }

@@ -9,25 +9,21 @@ class Event extends Model
 {
     use HasFactory;
 
-    // Relation avec l'organisateur (User)
     public function organizer(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'organizer_id');
     }
 
-    // Relation avec les catégories d'événements
     public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(EventCategory::class, 'category_id');
     }
 
-    // Relation avec les médias associés à l'événement
     public function media(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(EventMedia::class);
     }
 
-    // Relation avec les réservations pour cet événement
     public function reservations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Reservation::class);
@@ -74,7 +70,8 @@ class Event extends Model
     ];
 
 
-    public function user(){
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
 

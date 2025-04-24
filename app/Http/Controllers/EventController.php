@@ -47,6 +47,8 @@ class EventController extends BaseController
         ]);
 
         $fields['user_id'] = $request->user()->id ?? $request->input('user_id');
+        $fields['organizer_id'] = $request->user()->id ?? $request->input('organizer_id');
+
 
         $event = Event::create($fields);
 

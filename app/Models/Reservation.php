@@ -11,14 +11,13 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    // Relation avec l'événement réservé
-    public function event()
+    protected $fillable = ['event_id', 'user_id', 'number_of_places', 'description', 'status'];
+    public function event(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Event::class);
     }
 
-    // Relation avec l'utilisateur qui a fait la réservation
-    public function user()
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
     }

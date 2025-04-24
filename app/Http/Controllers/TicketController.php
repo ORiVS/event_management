@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Notification;
 use App\Models\Ticket;
 use App\Models\Guest;
 use Illuminate\Http\Request;
@@ -51,6 +52,13 @@ class TicketController extends BaseController
             'issued_at' => Carbon::now(),
             'category_id' => $request->category_id,
             'payment_status' => 'pending',
+        ]);
+
+        Notification::create([
+            'user_id' => $event->organizer_id ?? auth()->id(),
+            'type' => Notification::TYPE_RESERVATION,
+            'message' => "Vous avez réservé un nouveau ticket (#{$ticket->ticket_code}) pour l'événement « {$event->title} ».",
+            'status' => Notification::STATUS_PENDING,
         ]);
 
         return response()->json($ticket->load('event', 'guest', 'category'), 201);
