@@ -2,53 +2,40 @@
 
 namespace App\Notifications;
 
+use App\Models\Reservation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ReservationConfirmed extends Notification
+class ReservationConfirmed extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct()
+    public function __construct(public Reservation $reservation) {}
+
+    public function via($notifiable): array
     {
-        //
+        return ['mail', 'database'];
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->subject('Confirmation de votre réservation')
+            ->greeting("Bonjour {$notifiable->name},")
+            ->line("Votre réservation pour l'événement « {$this->reservation->event->title} » a bien été prise en compte.")
+            ->line("Nombre de places : {$this->reservation->number_of_places}")
+            ->action('Voir l\'événement', url("/events/{$this->reservation->event_id}"))
+            ->line('Merci pour votre confiance !');
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
+    public function toDatabase($notifiable): array
     {
         return [
-            //
+            'message' => "Votre réservation pour l’événement « {$this->reservation->event->title} » est confirmée.",
+            'event_id' => $this->reservation->event_id,
+            'reservation_id' => $this->reservation->id,
         ];
     }
 }

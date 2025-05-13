@@ -19,9 +19,13 @@ class AuthController extends Controller
     {
         $user = $this->userService->register($request->validated());
 
+        $user->assignRole('participant');
+
+        $user->sendEmailVerificationNotification();
+
         $token = $user->createToken($request->input("name"));
 
-    return response()->json([
+        return response()->json([
         'user' => $user,
         'token' => $token->plainTextToken,
     ]);
@@ -32,12 +36,12 @@ class AuthController extends Controller
         $data = $request->validated();
 
         try {
-            $user = $this->userService->login($data); // Essaye de connecter l'utilisateur
+            $user = $this->userService->login($data);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
 
-        $token = $user->createToken($data['email']); // Crée un token avec l'email de l'utilisateur
+        $token = $user->createToken($data['email']);
 
         return response()->json([
             'user' => $user,

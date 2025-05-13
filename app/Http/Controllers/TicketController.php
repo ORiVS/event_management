@@ -26,9 +26,23 @@ class TicketController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index(): \Illuminate\Database\Eloquent\Collection
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        return Ticket::all();
+        $user = $request->user();
+
+        if ($user->hasRole('admin')) {
+            $tickets = Ticket::with('event', 'guest', 'category')->get();
+        } elseif ($user->hasRole('organisateur')) {
+            $tickets = Ticket::whereHas('event', function ($query) use ($user) {
+                $query->where('organizer_id', $user->id);
+            })->with('event', 'guest', 'category')->get();
+        } else {
+            $tickets = Ticket::whereHas('guest', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->with('event', 'guest', 'category')->get();
+        }
+
+        return response()->json($tickets);
     }
 
     /**
@@ -62,6 +76,12 @@ class TicketController extends BaseController
             'message' => "Vous avez réservé un nouveau ticket (#{$ticket->ticket_code}) pour l'événement « {$event->title} ». ",
             'status' => Notification::STATUS_PENDING,
         ]);
+        $user = Guest::find($request->guest_id)->user ?? auth()->user(); // destinataire
+
+        if ($user) {
+            $user->notify(new \App\Notifications\TicketGenerated($ticket));
+        }
+
 
         return response()->json($ticket->load('event', 'guest', 'category'), 201);
     }
@@ -79,6 +99,8 @@ class TicketController extends BaseController
      */
     public function update(Request $request, Ticket $ticket): \Illuminate\Http\JsonResponse
     {
+        $this->authorize('manage', $ticket);
+
         $request->validate([
             'payment_status' => 'in:unpaid,pending,paid,cancelled',
         ]);
@@ -93,6 +115,8 @@ class TicketController extends BaseController
      */
     public function destroy(Ticket $ticket): \Illuminate\Http\JsonResponse
     {
+        $this->authorize('manage', $ticket);
+
         $ticket->delete();
         return response()->json(['message' => 'Ticket cancelled']);
     }
@@ -100,12 +124,12 @@ class TicketController extends BaseController
     /**
      * Télécharger un ticket en PDF avec QR code.
      */
-
-    public function download(Ticket $ticket)
+    public function download(Ticket $ticket): \Illuminate\Http\Response
     {
+        $this->authorize('manage', $ticket);
+
         $ticket->load('event', 'guest', 'category');
 
-        // Utilisation du backend SVG (compatible Laravel + DomPDF)
         $renderer = new ImageRenderer(
             new RendererStyle(150),
             new SvgImageBackEnd()
@@ -113,9 +137,10 @@ class TicketController extends BaseController
         $writer = new Writer($renderer);
         $qrCode = base64_encode($writer->writeString($ticket->ticket_code));
 
-        $user = auth()->user(); // l'utilisateur qui télécharge
+        $user = auth()->user();
 
         $pdf = Pdf::loadView('tickets.pdf', compact('ticket', 'qrCode', 'user'));
 
         return $pdf->download("ticket_{$ticket->ticket_code}.pdf");
-    }}
+    }
+}

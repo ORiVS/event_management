@@ -47,6 +47,7 @@ class ReservationController extends BaseController
             'description' => $request->description,
             'status' => 'pending',
         ]);
+        $request->user()->notify(new \App\Notifications\ReservationConfirmed($reservation));
 
         return response()->json($reservation, 201);
     }

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Ticket;
+use App\Policies\TicketPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Reservation;
@@ -15,8 +17,10 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        Reservation::class => ReservationPolicy::class,
+        \App\Models\Reservation::class => \App\Policies\ReservationPolicy::class,
+        \App\Models\Ticket::class => \App\Policies\TicketPolicy::class,
     ];
+
 
     /**
      * Register any authentication / authorization services.
